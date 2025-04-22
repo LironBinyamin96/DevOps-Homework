@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+    stages {
+        stage('Read Key-Value File') {
+            steps {
+                script {
+                    def keyValueFile = readFile 'key-value-param'
+                    def keyValue = keyValueFile.split(':')
+                    if (keyValue.length != 2) {
+                        error("Invalid format in key-value-param file. Expected format: some-key:some-value")
+                    }
+                    env.KEY = keyValue[0].trim()
+                    env.VALUE = keyValue[1].trim()
+                }
+            }
+        }
+
+        stage('Put message') {
+            steps {
+                sh '''
+                curl --request PUT --data "$VALUE" "$KEY"
+                '''
+            }
+        }
+
+        stage('Get message') {
+            steps {
+                script {
+                    def response = sh(
+                        script: "curl -s $KEY",
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Consul raw response: ${response}"
+
+                    try {
+                        def json = readJSON text: response
+                        def decoded = new String(json[0].Value.decodeBase64())
+                        echo "Decoded message: ${decoded}"
+                    } catch (err) {
+                        echo "Failed to parse JSON: ${err}"
+                        error("Could not parse response as JSON. Check Consul URL or network.")
+                    }
+                }
+            }
+        }
+    }
+    post {
+        success {
+            slackSend (
+                channel: 'successful-builds',
+                message: ":white_check_mark: Build SUCCESS: ${env.JOB_NAME} [${env.BUILD_NUMBER}] (<${env.BUILD_URL}|View build>)",
+                color: 'good'
+            )
+        }
+    }
+}
