@@ -1,0 +1,73 @@
+services:
+  # Jenkins service
+  app:
+    image: jenkins/jenkins
+    container_name: jenkins
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 9090:8080
+      - 50000:50000
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+      - /var/jenkins_home/workspace/image-from-git-to-dockerhub:/project
+    networks:
+      - jenkins
+
+  # Nginx service
+  web:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - jenkins
+
+  consul:
+    image: hashicorp/consul:latest
+    container_name: consul
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    volumes:
+      - consul_data:/consul/data
+    command: "agent -server -bootstrap-expect=1 -client=0.0.0.0 -ui -data-dir=/consul/data"
+    networks:
+      - jenkins
+    restart: unless-stopped
+
+  # Vault service
+  vault:
+    image: hashicorp/vault:latest
+    container_name: vault
+    ports:
+      - "8200:8200"
+    cap_add:
+      - IPC_LOCK
+    environment:
+      - VAULT_ADDR=http://0.0.0.0:8200
+      - CONSUL_HTTP_ADDR=http://consul:8500
+    volumes:
+      - vault_data:/vault/data
+      - ./vault/config:/vault/config
+    networks:
+      - jenkins
+    depends_on:
+      - consul
+    command: vault server -config=/vault/config/vault.hcl
+    restart: unless-stopped
+
+volumes:
+  jenkins_home:
+  consul_data:
+  vault_data:
+
+networks:
+  jenkins:
+    external: true
+    
