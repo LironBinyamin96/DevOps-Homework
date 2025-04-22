@@ -18,7 +18,7 @@ pipeline {
         stage('Put message') {
             steps {
                 sh '''
-                    curl --request PUT --data '${env.VALUE}' http://localhost:8500/v1/kv/${env.KEY}
+                        curl --request PUT --data "${env.VALUE}" http://localhost:8500/v1/kv/${env.KEY}
                 '''
             }
         }
