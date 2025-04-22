@@ -4,7 +4,7 @@ pipeline {
         stage('Read Key-Value File') {
             steps {
                 script {
-                    def keyValueFile = readFile 'key-value-param'
+                    def keyValueFile = readFile 'consul/key-value-param'
                     def keyValue = keyValueFile.split(':')
                     if (keyValue.length != 2) {
                         error("Invalid format in key-value-param file. Expected format: some-key:some-value")
