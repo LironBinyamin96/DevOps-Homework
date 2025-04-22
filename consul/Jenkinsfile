@@ -18,7 +18,7 @@ pipeline {
         stage('Put message') {
             steps {
                 sh """#!/bin/bash
-                    curl --request PUT --data \"${VALUE}\" http://localhost:8500/v1/kv/${KEY}
+                    curl --request PUT --data \"${VALUE}\" http://consul:8500/v1/kv/${KEY}
                 """
             }
         }
@@ -27,7 +27,7 @@ pipeline {
             steps {
                 script {
                     def response = sh(
-                        script: "curl -s http://localhost:8500/v1/kv/${KEY}",
+                        script: "curl -s http://consul:8500/v1/kv/${KEY}",
                         returnStdout: true
                     ).trim()
 
