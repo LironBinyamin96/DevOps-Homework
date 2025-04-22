@@ -60,7 +60,7 @@ pipeline {
                             echo "localhost ansible_connection=local" >> ~/inventory
                             
                             # Run the playbook
-                            ansible-playbook -i ~/inventory ~/nginx.yml
+                            ansible-playbook -i ~/inventory ~/playbook-Nginx.yml
                         '
                     """
                 }
