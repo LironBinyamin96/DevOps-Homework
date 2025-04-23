@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'key_name', defaultValue: '<your_key>', description: '')
+        password(name: 'password_name', defaultValue: '<your_password>', description: '')
+    }
+
+    environment {
+        VAULT_ADDR = 'http://vault:8200'
+        VAULT_TOKEN = credentials('vault-token-myapp')
+        VAULT_SECRET_PATH = 'secret/myapp'
+    }
+
+    stages {
+        stage('Push to Vault') {
+            steps {
+                script {
+                    def jsonPayload = """
+                    {
+                      "data": {
+                        "key": "${params.some_key}",
+                        "password": "${params.some_password}"
+                      }
+                    }
+                    """
+
+                    httpRequest(
+                        httpMode: 'POST',
+                        url: "${env.VAULT_ADDR}/v1/${env.VAULT_SECRET_PATH}",
+                        contentType: 'APPLICATION_JSON',
+                        requestBody: jsonPayload,
+                        customHeaders: [[name: 'X-Vault-Token', value: env.VAULT_TOKEN]]
+                    )
+                }
+            }
+        }
+    }
+}
