@@ -32,8 +32,14 @@
     mode: '0644'
   notify: Restart Nginx
 
-- name: Deploy custom HTML page
-  copy:
-    src: files/index.html 
+- name: Deploy custom index.html
+  template:
+    src: index.html.j2
     dest: /var/www/html/index.html
-  notify: Restart Nginx
+  notify: Restart nginx
+
+#- name: Deploy custom HTML page
+#  copy:
+#    src: files/index.html 
+#    dest: /var/www/html/index.html
+#  notify: Restart Nginx
