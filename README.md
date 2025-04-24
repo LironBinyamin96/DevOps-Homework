@@ -30,6 +30,10 @@ Jenkinsfile – Jenkinsfile that runs the playbook.
 ## Nginx-ansible
 An additional folder demonstrating the use of Ansible for Nginx deployment, but not following the Galaxy structure. It includes a Jenkinsfile and a simple playbook named playbook-Nginx.yml.
 
+## Artifactory
+An Ansible-based setup for installing and configuring JFrog Artifactory OSS.
+This role automates deployment using Ansible playbooks, which install the necessary dependencies and configure Artifactory as a systemd service.
+
 ## cloud-init
 A new folder containing cloud-init scripts for automating tasks when the machine starts, including updating the IP in AWS Route 53.
 
