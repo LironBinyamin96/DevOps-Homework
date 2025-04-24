@@ -1,0 +1,36 @@
+---
+- name: Deploy JFrog Artifactory OSS with Docker using Ansible
+  hosts: servers
+  connection: local
+  gather_facts: false
+  vars:
+    artifactory_image: docker.bintray.io/jfrog/artifactory-oss:6.23.38
+    artifactory_container_name: artifactory
+    artifactory_ports:
+      - "8081:8081"
+    artifactory_volume: artifactory_data
+    artifactory_network: jfrog
+
+  tasks:
+    - name: Create Docker volume for Artifactory
+      community.docker.docker_volume:
+        name: "{{ artifactory_volume }}"
+
+    - name: Create Docker network for Artifactory
+      community.docker.docker_network:
+        name: "{{ artifactory_network }}"
+        driver: bridge
+
+    - name: Run Artifactory container
+      community.docker.docker_container:
+        name: "{{ artifactory_container_name }}"
+        image: "{{ artifactory_image }}"
+        state: started
+        restart_policy: always
+        ports: "{{ artifactory_ports }}"
+        env:
+          JF_SHARED_NODE: "true"
+        volumes:
+          - "{{ artifactory_volume }}:/var/opt/jfrog/artifactory"
+        networks:
+          - name: "{{ artifactory_network }}"
