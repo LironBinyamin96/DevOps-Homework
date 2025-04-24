@@ -6,7 +6,6 @@
     name: nginx
     state: latest
     update_cache: yes
-  tags: ["nginx_install"]
 
 - name: Get Nginx port from local Consul
   uri:
@@ -15,19 +14,14 @@
   register: nginx_port_response
   delegate_to: localhost
   become: false
-  tags: ["get_nginx_port"]
-
 
 - name: Set Nginx port fact
   set_fact:
     nginx_port: "{{ nginx_port_response.content }}"
-  tags: ["set_nginx_port"]
-
 
 - name: Show which port will be used for Nginx
   debug:
     msg: "Nginx will run on port {{ nginx_port }}"
-  tags: ["show_nginx_port"]
 
 - name: Deploy nginx.conf rendered with the selected port
   template:
@@ -37,21 +31,9 @@
     group: root
     mode: '0644'
   notify: Restart Nginx
-  tags: [deploy_nginx_conf]
 
-- name: Deploy custom index.html
-  template:
-    src: index.html.j2
+- name: Deploy custom HTML page
+  copy:
+    src: files/index.html 
     dest: /var/www/html/index.html
-  notify: Restart nginx
-  tags: [deploy]
-  
-- name: Include rolling update steps
-  include_tasks: rolling_update.yml
-  tags: ["rolling"]
-
-#- name: Deploy custom HTML page
-#  copy:
-#    src: files/index.html 
-#    dest: /var/www/html/index.html
-#  notify: Restart Nginx
+  notify: Restart Nginx
