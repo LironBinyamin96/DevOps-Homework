@@ -1,0 +1,4 @@
+- name: 🧪 Test rolling update task
+  debug:
+    msg: "🎉 This is a test message from the rolling update task!"
+  tags: ["rolling"]
